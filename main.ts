@@ -1,11 +1,7 @@
 // main.ts
-const html = await Deno.readTextFile("index.html");
 const PORT = 9090;
+const html = await Deno.readTextFile("index.html");
 const url = `http://localhost:${PORT}`;
-
-// Start the HTTP server — returns a signal when it's stopped
-const listener = Deno.listen({ port: PORT });
-console.log(`✅ Server running at ${url}`);
 
 // Open browser after short delay
 setTimeout(async () => {
@@ -16,11 +12,11 @@ setTimeout(async () => {
   } else if (Deno.build.os === "darwin") {
     command = ["open", url];
   } else {
-    // Linux fallback for missing xdg-open
+    // Linux fallback
     const check = new Deno.Command("which", { args: ["xdg-open"] });
     const status = await check.spawn().status;
     if (!status.success) {
-      console.warn("⚠️ 'xdg-open' not found. Please open your browser manually:", url);
+      console.warn("⚠️ 'xdg-open' not found. Please open manually:", url);
       return;
     }
     command = ["xdg-open", url];
@@ -35,19 +31,14 @@ setTimeout(async () => {
   }
 }, 500);
 
-// Serve requests
-for await (const conn of listener) {
-  handleHttp(conn);
-}
+// Use Deno.serve — keeps running
+Deno.serve({ port: PORT }, (_req) =>
+  new Response(html, {
+    headers: { "content-type": "text/html" },
+  })
+);
 
-// Basic HTTP handler
-async function handleHttp(conn: Deno.Conn) {
-  const httpConn = Deno.serveHttp(conn);
-  for await (const requestEvent of httpConn) {
-    requestEvent.respondWith(
-      new Response(html, {
-        headers: { "content-type": "text/html" },
-      }),
-    );
-  }
-}
+// 💡 Important: Don't exit the main thread
+// Deno.serve internally uses an async server loop, but in compiled .exe builds,
+// the script can sometimes exit immediately unless we anchor it with a forever promise.
+await new Promise(() => {});  // Keep the process alive
