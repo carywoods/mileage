@@ -1,17 +1,14 @@
 // main.ts
 const html = await Deno.readTextFile("index.html");
+const PORT = 9090;
+const url = `http://localhost:${PORT}`;
 
-// Start the HTTP server
-const server = Deno.serve({ port: 9090 }, (_req) => {
-  return new Response(html, {
-    headers: { "content-type": "text/html" },
-  });
-});
+// Start the HTTP server — returns a signal when it's stopped
+const listener = Deno.listen({ port: PORT });
+console.log(`✅ Server running at ${url}`);
 
-// Open the browser after a short delay
+// Open browser after short delay
 setTimeout(async () => {
-  const url = "http://localhost:9090";
-
   let command: string[];
 
   if (Deno.build.os === "windows") {
@@ -19,11 +16,11 @@ setTimeout(async () => {
   } else if (Deno.build.os === "darwin") {
     command = ["open", url];
   } else {
-    // For Linux, check if xdg-open exists
+    // Linux fallback for missing xdg-open
     const check = new Deno.Command("which", { args: ["xdg-open"] });
     const status = await check.spawn().status;
     if (!status.success) {
-      console.warn("⚠️ 'xdg-open' not found. Please open the browser manually:", url);
+      console.warn("⚠️ 'xdg-open' not found. Please open your browser manually:", url);
       return;
     }
     command = ["xdg-open", url];
@@ -33,10 +30,24 @@ setTimeout(async () => {
     new Deno.Command(command[0], {
       args: command.slice(1),
     }).spawn();
-  } catch (error) {
-    console.error("❌ Failed to open browser:", error);
+  } catch (err) {
+    console.error("❌ Failed to open browser:", err);
   }
 }, 500);
 
-// Keep the server running
-await server.finished;
+// Serve requests
+for await (const conn of listener) {
+  handleHttp(conn);
+}
+
+// Basic HTTP handler
+async function handleHttp(conn: Deno.Conn) {
+  const httpConn = Deno.serveHttp(conn);
+  for await (const requestEvent of httpConn) {
+    requestEvent.respondWith(
+      new Response(html, {
+        headers: { "content-type": "text/html" },
+      }),
+    );
+  }
+}
