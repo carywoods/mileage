@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pike Township Mileage Reimbursement</title>
+    <style>
+        :root {
+            --primary-color: #0055a5;
+            --secondary-color: #f7f7f7;
+            --accent-color: #ffcb05;
+            --text-color: #333;
+            --border-color: #ddd;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 0;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            margin: 0;
+            padding: 0 20px;
+        }
+        
+        .app-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .report-form {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .form-row {
+            display: flex;
+            margin-bottom: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .form-group {
+            margin-right: 20px;
+            margin-bottom: 10px;
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #003d7a;
+        }
+        
+        button.secondary {
+            background-color: #6c757d;
+        }
+        
+        button.secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        .trips-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .trips-table th, .trips-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .trips-table th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .trips-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .trips-table tr:nth-child(even) {
+            background-color: var(--secondary-color);
+        }
+        
+        .summary-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        .summary-card h2 {
+            margin-top: 0;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .summary-row:last-child {
+            border-bottom: none;
+            font-weight: bold;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .delete-btn {
+            color: #dc3545;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .delete-btn:hover {
+            color: #bd2130;
+            text-decoration: underline;
+        }
+        
+        .field-info {
+            color: #666;
+            font-size: 0.85em;
+            margin-top: 3px;
+        }
+        
+        .info-box {
+            background-color: #e0f7fa;
+            border-left: 4px solid #00bcd4;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        @media print {
+            .no-print {
+                display: none;
+            }
+            
+            body {
+                background-color: white;
+            }
+            
+            .container {
+                width: 100%;
+                max-width: 100%;
+                padding: 0;
+                margin: 0;
+            }
+            
+            .report-form, .trips-table, .summary-card {
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container app-title">
+            <h1>Pike Township Mileage Reimbursement</h1>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="report-form no-print">
+            <h2>Add a New Trip</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="tripDate">Date:</label>
+                    <input type="date" id="tripDate" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="destination">Destination:</label>
+                    <select id="destination" required>
+                        <option value="">Select destination</option>
+                        <!-- Options will be added by JavaScript -->
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="purpose">Purpose of Trip:</label>
+                    <input type="text" id="purpose" placeholder="Purpose of your trip">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="calculatedMileage">Round Trip (miles):</label>
+                    <input type="text" id="calculatedMileage" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label for="currentOdometer">Current Odometer Reading (optional):</label>
+                    <input type="number" id="currentOdometer" placeholder="Current vehicle odometer" step="0.1">
+                    <div class="field-info">Only needed for the final odometer reading</div>
+                </div>
+            </div>
+            
+            <button id="addTripBtn">Add Trip</button>
+        </div>
+        
+        <h2>Recorded Trips</h2>
+        <table class="trips-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Destination</th>
+                    <th>Purpose</th>
+                    <th>Round Trip (miles)</th>
+                    <th>Odometer</th>
+                    <th class="no-print">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="tripsTableBody">
+                <!-- Trip rows will be added here -->
+            </tbody>
+        </table>
+        
+        <div class="summary-card">
+            <h2>Mileage Summary</h2>
+            <div class="summary-row">
+                <div>Total Trips:</div>
+                <div id="totalTrips">0</div>
+            </div>
+            <div class="summary-row">
+                <div>Total Mileage:</div>
+                <div id="totalMileage">0.0 miles</div>
+            </div>
+            <div class="summary-row">
+                <div>Reimbursement Amount (@ $0.70/mile):</div>
+                <div id="reimbursementAmount">$0.00</div>
+            </div>
+            <div class="summary-row">
+                <div>Reporting Period:</div>
+                <div id="reportingPeriod">-</div>
+            </div>
+            <div class="summary-row">
+                <div>Current Odometer Reading:</div>
+                <div id="currentOdometerReading">-</div>
+            </div>
+        </div>
+        
+        <div class="report-form no-print" style="margin-top: 30px;">
+            <h2>Generate Report</h2>
+            <div class="info-box">
+                <p><strong>Note:</strong> When generating a report, enter the <strong>final odometer reading</strong> below. The system will estimate previous odometer readings by:</p>
+                <ol>
+                    <li>Working backward from the final odometer reading</li>
+                    <li>Subtracting trip mileages for each trip</li>
+                    <li>Subtracting an additional 15 miles per day between trips</li>
+                </ol>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="reportMonth">Report Month:</label>
+                    <input type="month" id="reportMonth">
+                </div>
+                <div class="form-group">
+                    <label for="finalOdometer">Final Odometer Reading:</label>
+                    <input type="number" id="finalOdometer" placeholder="Vehicle's current odometer reading" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="employeeName">Employee Name:</label>
+                    <input type="text" id="employeeName" placeholder="Your name">
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button id="generateReportBtn">Generate Report</button>
+                <button id="printReportBtn">Print Report</button>
+                <button id="clearDataBtn" class="secondary">Clear All Data</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // School building data with distances from Guion Creek Middle School
+        const schoolBuildings = [
+            { name: "Central Elementary School", address: "7001 Zionsville Rd, Indianapolis, IN 46268", distance: 2.3 },
+            { name: "College Park Elementary School", address: "2811 Barnard St, Indianapolis, IN 46268", distance: 3.2 },
+            { name: "Deer Run Elementary School", address: "5401 N High School Rd, Indianapolis, IN 46254", distance: 2.3 },
+            { name: "Eagle Creek Elementary School", address: "6905 W 46th St, Indianapolis, IN 46254", distance: 0.6 },
+            { name: "Eastbrook Elementary School", address: "7625 New Augusta Rd, Indianapolis, IN 46268", distance: 3.0 },
+            { name: "Fishback Creek Public Academy", address: "8301 W 86th St, Indianapolis, IN 46278", distance: 3.6 },
+            { name: "Guion Creek Elementary School", address: "4301 W 52nd St, Indianapolis, IN 46254", distance: 0.1 },
+            { name: "Guion Creek Middle School", address: "4401 W 52nd St, Indianapolis, IN 46254", distance: 0.0 },
+            { name: "Lincoln Middle School", address: "5353 W 71st St, Indianapolis, IN 46268", distance: 1.9 },
+            { name: "New Augusta Public Academy - North", address: "7839 New Augusta Rd, Indianapolis, IN 46268", distance: 3.2 },
+            { name: "New Augusta Public Academy - South", address: "6450 Rodebaugh Rd, Indianapolis, IN 46268", distance: 2.8 },
+            { name: "Pike Freshman Center", address: "6250 Rodebaugh Rd, Indianapolis, IN 46268", distance: 2.6 },
+            { name: "Pike High School", address: "5401 W 71st St, Indianapolis, IN 46268", distance: 1.9 },
+            { name: "Pike Preparatory Academy", address: "5401 W 71st St, Indianapolis, IN 46268", distance: 1.9 },
+            { name: "Snacks Crossing Elementary School", address: "5455 W 56th St, Indianapolis, IN 46254", distance: 0.1 },
+            { name: "Nathaniel Jones Early Learning Center", address: "7140 Waldemar Dr, Indianapolis, IN 46268", distance: 2.5 },
+            { name: "Administrative Services Center", address: "6901 Zionsville Rd, Indianapolis, IN 46268", distance: 3.3 },
+            { name: "Pike Warehouse", address: "6643 Guion Rd, Indianapolis, IN 46268", distance: 3.0 }
+        ];
+        
+        // Sort buildings alphabetically (excluding Guion Creek Middle School)
+        const sortedBuildings = schoolBuildings
+            .filter(b => b.name !== "Guion Creek Middle School")
+            .sort((a, b) => a.name.localeCompare(b.name));
+        
+        // Global variables
+        let trips = [];
+        const REIMBURSEMENT_RATE = 0.70; // $0.70 per mile
+        const DAILY_MILEAGE = 15; // 15 miles per day between trips
+        
+        // Elements
+        const destinationSelect = document.getElementById('destination');
+        const calculatedMileageInput = document.getElementById('calculatedMileage');
+        const currentOdometerInput = document.getElementById('currentOdometer');
+        const addTripBtn = document.getElementById('addTripBtn');
+        const tripsTableBody = document.getElementById('tripsTableBody');
+        const totalTripsElement = document.getElementById('totalTrips');
+        const totalMileageElement = document.getElementById('totalMileage');
+        const reimbursementAmountElement = document.getElementById('reimbursementAmount');
+        const reportingPeriodElement = document.getElementById('reportingPeriod');
+        const currentOdometerReadingElement = document.getElementById('currentOdometerReading');
+        const generateReportBtn = document.getElementById('generateReportBtn');
+        const printReportBtn = document.getElementById('printReportBtn');
+        const clearDataBtn = document.getElementById('clearDataBtn');
+        
+        // Populate destination dropdown
+        sortedBuildings.forEach(building => {
+            const option = document.createElement('option');
+            option.value = building.name;
+            option.textContent = building.name;
+            destinationSelect.appendChild(option);
+        });
+        
+        // Event listener for destination change - update calculated mileage
+        destinationSelect.addEventListener('change', function() {
+            const selectedBuilding = schoolBuildings.find(b => b.name === this.value);
+            if (selectedBuilding) {
+                // Double the distance for round trip
+                const roundTripDistance = (selectedBuilding.distance * 2).toFixed(1);
+                calculatedMileageInput.value = roundTripDistance;
+            } else {
+                calculatedMileageInput.value = "";
+            }
+        });
+        
+        // Event listener for Add Trip button
+        addTripBtn.addEventListener('click', function() {
+            const tripDate = document.getElementById('tripDate').value;
+            const destination = document.getElementById('destination').value;
+            const purpose = document.getElementById('purpose').value;
+            const calculatedMileage = parseFloat(calculatedMileageInput.value);
+            const currentOdometer = currentOdometerInput.value ? parseFloat(currentOdometerInput.value) : null;
+            
+            // Basic validation
+            if (!tripDate || !destination) {
+                alert("Please enter date and select destination");
+                return;
+            }
+            
+            // Create trip object
+            const trip = {
+                date: tripDate,
+                destination,
+                purpose,
+                mileage: calculatedMileage.toFixed(1),
+                odometer: currentOdometer ? currentOdometer.toFixed(1) : null
+            };
+            
+            // Add to trips array
+            trips.push(trip);
+            
+            // Sort trips by date
+            trips.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            // Update the table and summary
+            renderTripsTable();
+            updateSummary();
+            
+            // Save to localStorage
+            saveTripsToLocalStorage();
+            
+            // Clear form
+            document.getElementById('tripDate').value = "";
+            document.getElementById('destination').value = "";
+            document.getElementById('purpose').value = "";
+            calculatedMileageInput.value = "";
+            currentOdometerInput.value = "";
+        });
+        
+        // Function to render trips table
+        function renderTripsTable() {
+            tripsTableBody.innerHTML = "";
+            
+            trips.forEach((trip, index) => {
+                const row = document.createElement('tr');
+                
+                // Format date for display
+                const formattedDate = new Date(trip.date).toLocaleDateString();
+                
+                row.innerHTML = `
+                    <td>${formattedDate}</td>
+                    <td>${trip.destination}</td>
+                    <td>${trip.purpose || "-"}</td>
+                    <td>${trip.mileage} mi</td>
+                    <td>${trip.odometer ? trip.odometer : "-"}</td>
+                    <td class="no-print">
+                        <button class="delete-btn" data-index="${index}">Delete</button>
+                    </td>
+                `;
+                
+                tripsTableBody.appendChild(row);
+            });
+            
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    trips.splice(index, 1);
+                    renderTripsTable();
+                    updateSummary();
+                    saveTripsToLocalStorage();
+                });
+            });
+        }
+        
+        // Function to update summary information
+        function updateSummary() {
+            // Total trips
+            totalTripsElement.textContent = trips.length;
+            
+            // Total mileage
+            const totalMileage = trips.reduce((sum, trip) => sum + parseFloat(trip.mileage), 0);
+            totalMileageElement.textContent = totalMileage.toFixed(1) + " miles";
+            
+            // Reimbursement amount
+            const reimbursementAmount = totalMileage * REIMBURSEMENT_RATE;
+            reimbursementAmountElement.textContent = "$" + reimbursementAmount.toFixed(2);
+            
+            // Reporting period
+            if (trips.length > 0) {
+                const dates = trips.map(trip => new Date(trip.date));
+                const minDate = new Date(Math.min(...dates));
+                const maxDate = new Date(Math.max(...dates));
+                
+                const formatDate = date => date.toLocaleDateString();
+                reportingPeriodElement.textContent = `${formatDate(minDate)} to ${formatDate(maxDate)}`;
+            } else {
+                reportingPeriodElement.textContent = "-";
+            }
+            
+            // Current odometer reading
+            const tripsWithOdometer = trips.filter(trip => trip.odometer !== null);
+            if (tripsWithOdometer.length > 0) {
+                // Find most recent trip with odometer reading
+                const mostRecentTrip = tripsWithOdometer.reduce((latest, trip) => {
+                    return new Date(trip.date) > new Date(latest.date) ? trip : latest;
+                }, tripsWithOdometer[0]);
+                
+                currentOdometerReadingElement.textContent = mostRecentTrip.odometer;
+            } else {
+                currentOdometerReadingElement.textContent = "-";
+            }
+        }
+        
+        // Event listener for Generate Report button
+        generateReportBtn.addEventListener('click', function() {
+            const reportMonth = document.getElementById('reportMonth').value;
+            const finalOdometer = parseFloat(document.getElementById('finalOdometer').value);
+            const employeeName = document.getElementById('employeeName').value;
+            
+            if (!reportMonth) {
+                alert("Please select a report month");
+                return;
+            }
+            
+            if (isNaN(finalOdometer)) {
+                alert("Please enter the final odometer reading");
+                return;
+            }
+            
+            // Filter trips by month if a month is selected
+            let filteredTrips = trips;
+            if (reportMonth) {
+                const [year, month] = reportMonth.split('-');
+                filteredTrips = trips.filter(trip => {
+                    const tripDate = new Date(trip.date);
+                    return tripDate.getFullYear() === parseInt(year) && 
+                           tripDate.getMonth() + 1 === parseInt(month);
+                });
+                
+                if (filteredTrips.length === 0) {
+                    alert("No trips found for the selected month");
+                    return;
+                }
+            }
+            
+            // Sort filtered trips by date (newest first)
+            filteredTrips.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            // Calculate odometer readings working backward from final reading
+            // Start with the final odometer reading
+            let currentOdometer = finalOdometer;
+            
+            // Make a copy so we don't modify the original trip objects
+            const reportTrips = JSON.parse(JSON.stringify(filteredTrips));
+            
+            // Process trips in reverse chronological order (newest to oldest)
+            for (let i = 0; i < reportTrips.length; i++) {
+                // Set the end odometer for this trip
+                reportTrips[i].endOdometer = currentOdometer.toFixed(1);
+                
+                // Subtract this trip's mileage
+                currentOdometer -= parseFloat(reportTrips[i].mileage);
+                
+                // Set the start odometer for this trip
+                reportTrips[i].startOdometer = currentOdometer.toFixed(1);
+                
+                // If there's another trip after this one (remember we're going newest to oldest)
+                if (i < reportTrips.length - 1) {
+                    // Calculate days between this trip and the next trip
+                    const currentTripDate = new Date(reportTrips[i].date);
+                    const nextTripDate = new Date(reportTrips[i+1].date);
+                    
+                    // Calculate difference in days
+                    const diffTime = Math.abs(currentTripDate - nextTripDate);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    
+                    // Subtract 15 miles per day between trips
+                    const dailyMileage = diffDays * DAILY_MILEAGE;
+                    currentOdometer -= dailyMileage;
+                }
+            }
+            
+            // Sort back to chronological order (oldest first)
+            reportTrips.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            // Update month title in the UI
+            if (reportMonth) {
+                const [year, month] = reportMonth.split('-');
+                const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleString('default', { month: 'long' });
+                document.title = `Mileage Report - ${monthName} ${year}`;
+                
+                if (employeeName) {
+                    document.querySelector('h1').textContent = `${employeeName} - Mileage Report - ${monthName} ${year}`;
+                } else {
+                    document.querySelector('h1').textContent = `Mileage Report - ${monthName} ${year}`;
+                }
+            }
+            
+            // Re-render the table with calculated odometer readings
+            renderReportTable(reportTrips);
+            
+            // Update summary with filtered data and final odometer
+            updateReportSummary(reportTrips, finalOdometer);
+            
+            // Alert that report is ready to print
+            alert("Report generated successfully. Click 'Print Report' to print or save as PDF.");
+        });
+        
+        // Function to render the report table with odometer readings
+        function renderReportTable(reportTrips) {
+            tripsTableBody.innerHTML = "";
+            
+            reportTrips.forEach((trip) => {
+                const row = document.createElement('tr');
+                
+                // Format date for display
+                const formattedDate = new Date(trip.date).toLocaleDateString();
+                
+                row.innerHTML = `
+                    <td>${formattedDate}</td>
+                    <td>${trip.destination}</td>
+                    <td>${trip.purpose || "-"}</td>
+                    <td>${trip.mileage} mi</td>
+                    <td>${trip.startOdometer} → ${trip.endOdometer}</td>
+                    <td class="no-print"></td>
+                `;
+                
+                tripsTableBody.appendChild(row);
+            });
+        }
+        
+        // Function to update summary information for the report
+        function updateReportSummary(reportTrips, finalOdometer) {
+            // Total trips
+            totalTripsElement.textContent = reportTrips.length;
+            
+            // Total mileage
+            const totalMileage = reportTrips.reduce((sum, trip) => sum + parseFloat(trip.mileage), 0);
+            totalMileageElement.textContent = totalMileage.toFixed(1) + " miles";
+            
+            // Reimbursement amount
+            const reimbursementAmount = totalMileage * REIMBURSEMENT_RATE;
+            reimbursementAmountElement.textContent = "$" + reimbursementAmount.toFixed(2);
+            
+            // Reporting period
+            if (reportTrips.length > 0) {
+                const dates = reportTrips.map(trip => new Date(trip.date));
+                const minDate = new Date(Math.min(...dates));
+                const maxDate = new Date(Math.max(...dates));
+                
+                const formatDate = date => date.toLocaleDateString();
+                reportingPeriodElement.textContent = `${formatDate(minDate)} to ${formatDate(maxDate)}`;
+            } else {
+                reportingPeriodElement.textContent = "-";
+            }
+            
+            // Current odometer reading
+            currentOdometerReadingElement.textContent = finalOdometer.toFixed(1);
+        }
+        
+        // Event listener for Print Report button
+        printReportBtn.addEventListener('click', function() {
+            window.print();
+        });
+        
+        // Event listener for Clear Data button
+        clearDataBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to clear all trips? This cannot be undone.')) {
+                trips = [];
+                renderTripsTable();
+                updateSummary();
+                localStorage.removeItem('pikeSchoolTrips');
+                
+                // Reset title
+                document.title = "Pike Township Mileage Reimbursement";
+                document.querySelector('h1').textContent = "Pike Township Mileage Reimbursement";
+                
+                alert("All data has been cleared");
+            }
+        });
+        
+        // Helper function to save trips to localStorage
+        function saveTripsToLocalStorage() {
+            localStorage.setItem('pikeSchoolTrips', JSON.stringify(trips));
+        }
+        
+        // Check for saved data in localStorage when page loads
+        window.addEventListener('load', function() {
+            // Load trips
+            const savedTrips = localStorage.getItem('pikeSchoolTrips');
+            if (savedTrips) {
+                trips = JSON.parse(savedTrips);
+                renderTripsTable();
+                updateSummary();
+            }
+            
+            // Set initial month to current month
+            const now = new Date();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            document.getElementById('reportMonth').value = `${year}-${month}`;
+        });
+    </script>
+</body>
+</html>

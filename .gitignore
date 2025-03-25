@@ -1,0 +1,5 @@
+main         # compiled binary
+main.exe     # compiled binary (Windows)
+*.log
+deno.lock
+.DS_Store
